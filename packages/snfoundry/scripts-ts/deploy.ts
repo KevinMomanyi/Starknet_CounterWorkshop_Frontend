@@ -50,17 +50,30 @@ const deployScript = async (): Promise<void> => {
   });
 };
 
-const main = async (): Promise<void> => {
-  try {
-    await deployScript();
-    await executeDeployCalls();
-    exportDeployments();
 
-    console.log(green("All Setup Done!"));
-  } catch (err) {
-    console.log(err);
-    process.exit(1); //exit with error so that non subsequent scripts are run
-  }
+const deployScript2 = async (): Promise<void> => {
+  await deployContract({
+    contract: "Counter",
+    constructorArgs: {
+      init_value: 10, 
+      owner: '0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691',
+    },
+  });
 };
 
-main();
+
+
+deployScript()
+  .then (() => deployScript2())
+  .then(async () => {
+    executeDeployCalls()
+      .then(() => {
+        exportDeployments();
+        console.log(green("All Setup Done"));
+      })
+      .catch((e) => {
+        console.error(e);
+        process.exit(1); // exit with error so that non subsequent scripts are run
+      });
+  })
+  .catch(console.error);
